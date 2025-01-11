@@ -4,32 +4,32 @@ from fpdf import FPDF
 import tempfile
 import os
 
-
-# Функция для расчета (n-1)!
-def calculate_factorial(n):
+# Функция для расчета M! где M = N - 1
+def calculate_factorial(N):
     try:
-        N = int(n)
+        N = int(N)
     except ValueError:
-        return None, "Неверный ввод. Пожалуйста, введите положительное целое число."
+        return None, "Неверный ввод. Пожалуйста, введите положительное целое число.", None
 
     if N < 1:
-        return None, "Неверный ввод. Пожалуйста, введите целое число больше или равное 1."
+        return None, "Неверный ввод. Пожалуйста, введите целое число больше или равное 1.", None
+
+    M = N - 1
 
     try:
-        # Вычисляем (N-1)! как целое число
-        factorial_result = mp.fac(N - 1)
+        # Вычисляем M! как целое число
+        factorial_result = mp.fac(M)
         # Преобразуем результат в строку без экспоненты и десятичной точки
         result_string = str(int(factorial_result))
 
         digit_count = len(result_string)
 
-        return result_string, digit_count
+        return result_string, digit_count, M
     except Exception as e:
-        return None, f"Ошибка вычисления: {str(e)}"
-
+        return None, f"Ошибка вычисления: {str(e)}", None
 
 # Функция для экспорта результата в PDF
-def export_to_pdf(N, factorial_result, digit_count):
+def export_to_pdf(M, factorial_result, digit_count):
     pdf = FPDF()
     pdf.add_page()
 
@@ -47,7 +47,7 @@ def export_to_pdf(N, factorial_result, digit_count):
     pdf.set_font('DejaVu', '', 12)
 
     # Формула
-    formula = f"Формула разницы: ({N} - 1)!"
+    formula = f"Формула разницы: {M}!"
     pdf.multi_cell(0, 10, formula)
 
     # Количество цифр
@@ -61,7 +61,7 @@ def export_to_pdf(N, factorial_result, digit_count):
     # Например, каждые 100 символов
     chunk_size = 100
     chunks = [factorial_result[i:i + chunk_size] for i in range(0, len(factorial_result), chunk_size)]
-    factorial_text = f"({N} - 1)! =\n" + "\n".join(chunks)
+    factorial_text = f"{M}! =\n" + "\n".join(chunks)
     pdf.multi_cell(0, 10, factorial_text)
 
     # Сохраняем PDF во временный файл
@@ -69,20 +69,19 @@ def export_to_pdf(N, factorial_result, digit_count):
     pdf.output(temp_file.name)
     return temp_file.name
 
-
 # Интерфейс Streamlit
 st.title("Формула разницы")
 
-N = st.text_input("Введите число (N)", "5")
+N_input = st.text_input("Введите число (N)", "5")
 
 if st.button("Вычислить"):
-    result, digit_count_or_error = calculate_factorial(N)
+    result, digit_count_or_error, M = calculate_factorial(N_input)
     if result:
         st.success(f"Результат содержит {digit_count_or_error} цифр.")
-        st.text(f"({N-1})! = {result}")
+        st.text(f"{M}! = {result}")
 
         # Создаем PDF и сохраняем путь к файлу
-        pdf_path = export_to_pdf(N, result, digit_count_or_error)
+        pdf_path = export_to_pdf(M, result, digit_count_or_error)
 
         if pdf_path:
             # Предоставляем кнопку для скачивания PDF
