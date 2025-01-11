@@ -79,7 +79,7 @@ if st.button("Вычислить"):
     result, digit_count_or_error = calculate_factorial(N)
     if result:
         st.success(f"Результат содержит {digit_count_or_error} цифр.")
-        st.text(f"({N} - 1)! = {result}")
+        st.text(f"({N-1})! = {result}")
 
         # Создаем PDF и сохраняем путь к файлу
         pdf_path = export_to_pdf(N, result, digit_count_or_error)
